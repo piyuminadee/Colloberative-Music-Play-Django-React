@@ -38,7 +38,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'api.apps.ApiConfig',  #manually add- because apps.py in api folder need to tell setting.py
-    'rest_framework'  #manually add
+    'rest_framework',  #manually add
+    'frontend.apps.FrontendConfig'
 ]
 
 MIDDLEWARE = [
