@@ -1,6 +1,7 @@
 from django.shortcuts import render
 # from django.http import HttpReques
 from .serializer import RoomSerializer, CreateRoomSerializer
+from django.views.decorators.csrf import csrf_exempt
 from rest_framework import generics, status
 from .models import Room 
 from rest_framework.views import APIView
