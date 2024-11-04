@@ -6,5 +6,7 @@ urlpatterns = [
     
     path('', index),   #render index template
     path('join', index),
-    path('create', index)
+    path('create', index),
+    path('room/<str:roomCode>', index)
+    
 ]
