@@ -11,15 +11,26 @@ const Room = () => {
 
 
 
-    const leaveButtonPressed=()=>{
+    const leaveButtonPressed = () => {
         const requestOption = {
             method: "POST",
             headers: { "Content-Type": "application/json" },
         };
-        fetch("/api/leave-room", requestOption).then((_response) => {
-            navigate("/");
-        }); 
-    }
+    
+        fetch("/api/leave-room", requestOption)
+            .then((response) => {
+                if (response.ok) {
+                    navigate("/"); // Redirect only on successful request
+                } else {
+                    console.error("Failed to leave the room:", response.statusText);
+                    alert("Failed to leave the room. Please try again.");
+                }
+            })
+            .catch((error) => {
+                console.error("Network error:", error);
+                alert("Network error occurred. Please check your connection and try again.");
+            });
+    };
     
 
     useEffect(() => {
