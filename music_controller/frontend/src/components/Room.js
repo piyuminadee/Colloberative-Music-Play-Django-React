@@ -7,6 +7,7 @@ const Room = () => {
     const [votesToSkip, setVotesToSkip] = useState(2);
     const [guestCanPause, setGuestCanPause] = useState(false);
     const [isHost, setIsHost] = useState(false);
+    const [showSettings, setShowSettings] = useState(false);
     const navigate = useNavigate();
 
 
@@ -32,6 +33,11 @@ const Room = () => {
             });
     };
     
+    const updateShowSettings(value) {
+      this.setState({
+        showSettings: value,
+      });
+    }
 
     useEffect(() => {
         const getRoomDetails = () => {
