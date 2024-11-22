@@ -16,7 +16,7 @@ const Room = () => {
     const leaveButtonPressed = () => {
         const requestOption = {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: { "Content-Type": "application/json",  "X-CSRFToken": window.csrfToken, },
         };
     
         fetch("/api/leave-room", requestOption)
