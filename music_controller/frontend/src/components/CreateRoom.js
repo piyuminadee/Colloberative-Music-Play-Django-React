@@ -12,6 +12,7 @@ import {
   Collapse,
 } from "@mui/material";
 import { Link, useNavigate } from "react-router-dom";
+import Alert from "@mui/material/Alert";
 
 const CreateRoom = ({
   votesToSkip = 2,
@@ -73,8 +74,10 @@ const CreateRoom = ({
           setSuccessMsg("");
           setErrorMsg("Error updating room...");
         }
+        updateCallback(); 
       })
       .catch((error) => setErrorMsg(error.message));
+     
   };
 
   const renderCreateButtons = () => (
@@ -111,11 +114,26 @@ const CreateRoom = ({
   return (
     <Grid container spacing={1}>
       <Grid item xs={12} align="center">
-        <Collapse in={errorMsg || successMsg}>
-          {successMsg && <Typography color="primary">{successMsg}</Typography>}
-          {errorMsg && <Typography color="error">{errorMsg}</Typography>}
-        </Collapse>
-      </Grid>
+  <Collapse in={Boolean(errorMsg || successMsg)}>
+    {successMsg && (
+      <Alert 
+        severity="success"
+        onClose={() => setSuccessMsg("")} // Clear the success message
+      >
+        {successMsg}
+      </Alert>
+    )}
+    {errorMsg && (
+      <Alert 
+        severity="error"
+        onClose={() => setErrorMsg("")} // Clear the error message
+      >
+        {errorMsg}
+      </Alert>
+    )}
+  </Collapse>
+</Grid>
+
 
       <Grid item xs={12} align="center">
         <Typography component="h4" variant="h4">
@@ -129,7 +147,7 @@ const CreateRoom = ({
           </FormHelperText>
           <RadioGroup
             row
-            value={guestCanPauseState.toString()}
+          defaultValue={guestCanPauseState.toString()}
             onChange={handleGuestCanPauseChange}
           >
             <FormControlLabel

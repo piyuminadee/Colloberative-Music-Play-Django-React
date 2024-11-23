@@ -61,7 +61,7 @@ const Room = () => {
                    votesToSkip={votesToSkip}
                    guestCanPause={guestCanPause}
                    roomCode={roomCode}
-                   updateCallback={()=> setShowSettings(false)}
+                   updateCallback={getRoomDetails}
                  />
             </Grid>
             <Grid item xs={12} align="center">
@@ -77,20 +77,21 @@ const Room = () => {
         )
     }
 
-    useEffect(() => {
-        const getRoomDetails = () => {
-            fetch("/api/get-room?code=" + roomCode)
-                .then((response) => response.json())
-                .then((data) => {
-                    setVotesToSkip(data.votes_to_skip);
-                    setGuestCanPause(data.guest_can_pause);
-                    setIsHost(data.is_host);
-                })
-                .catch((error) => console.log("Error fetching room details:", error));
-        };
+    const getRoomDetails = () => {
+        fetch("/api/get-room?code=" + roomCode)
+            .then((response) => response.json())
+            .then((data) => {
+                setVotesToSkip(data.votes_to_skip);
+                setGuestCanPause(data.guest_can_pause);
+                setIsHost(data.is_host);
+            })
+            .catch((error) => console.log("Error fetching room details:", error));
+    };
 
+    useEffect(() => {
         getRoomDetails();
     }, [roomCode]);
+    
 
    
 
