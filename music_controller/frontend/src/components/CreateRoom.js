@@ -9,48 +9,135 @@ import {
   RadioGroup,
   Typography,
   Button,
+  Collapse,
 } from "@mui/material";
 import { Link, useNavigate } from "react-router-dom";
+import Alert from "@mui/material/Alert";
 
-const CreateRoom = () => {
-  const defaultVotes = 2;
+const CreateRoom = ({
+  votesToSkip = 2,
+  guestCanPause = true,
+  update = false,
+  roomCode = null,
+  updateCallback = () => {},
+}) => {
   const navigate = useNavigate();
+  const title = update ? "Update Room" : "Create Room";
 
-  const [guestCanPause, setGuestCanPause] = useState(true);
-  const [votesToSkip, setVotesToSkip] = useState(defaultVotes);
+  const [guestCanPauseState, setGuestCanPauseState] = useState(guestCanPause);
+  const [votesToSkipState, setVotesToSkipState] = useState(votesToSkip);
+  const [errorMsg, setErrorMsg] = useState("");
+  const [successMsg, setSuccessMsg] = useState("");
 
-  const handleVotesChange = (e) => {
-    setVotesToSkip(e.target.value);
-  };
-
-  const handleGuestCanPauseChange = (e) => {
-    setGuestCanPause(e.target.value === "true");
-  };
+  const handleVotesChangeState = (e) => setVotesToSkipState(e.target.value);
+  const handleGuestCanPauseChange = (e) =>
+    setGuestCanPauseState(e.target.value === "true");
 
   const handleRoomButtonPressed = () => {
     const requestOptions = {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-CSRFToken': window.csrfToken,
-      },
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        votes_to_skip: votesToSkip,
-        guest_can_pause: guestCanPause,
+        votes_to_skip: votesToSkipState,
+        guest_can_pause: guestCanPauseState,
       }),
     };
 
     fetch("/api/create-room", requestOptions)
-      .then((response) => response.json())
+      .then((response) => {
+        if (response.ok) {
+          return response.json();
+        }
+        throw new Error("Failed to create room.");
+      })
       .then((data) => navigate("/room/" + data.code))
-      .catch((error) => console.error("Error creating room:", error));
+      .catch((error) => setErrorMsg(error.message));
   };
+
+  const handleUpdateRoomButtonPressed = () => {
+    const requestOptions = {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        votes_to_skip: votesToSkipState,
+        guest_can_pause: guestCanPauseState,
+        code: roomCode,
+      }),
+    };
+
+    fetch("/api/update-room", requestOptions)
+      .then((response) => {
+        if (response.ok) {
+          setSuccessMsg("Room updated successfully!");
+          setErrorMsg("");
+        } else {
+          setSuccessMsg("");
+          setErrorMsg("Error updating room...");
+        }
+        updateCallback(); 
+      })
+      .catch((error) => setErrorMsg(error.message));
+     
+  };
+
+  const renderCreateButtons = () => (
+    <Grid container spacing={1}>
+      <Grid item xs={12} align="center">
+        <Button
+          color="primary"
+          variant="contained"
+          onClick={handleRoomButtonPressed}
+        >
+          Create A Room
+        </Button>
+      </Grid>
+      <Grid item xs={12} align="center">
+        <Button color="secondary" variant="contained" to="/" component={Link}>
+          Back
+        </Button>
+      </Grid>
+    </Grid>
+  );
+
+  const renderUpdateButton = () => (
+    <Grid item xs={12} align="center">
+      <Button
+        color="primary"
+        variant="contained"
+        onClick={handleUpdateRoomButtonPressed}
+      >
+        Update A Room
+      </Button>
+    </Grid>
+  );
 
   return (
     <Grid container spacing={1}>
       <Grid item xs={12} align="center">
+  <Collapse in={Boolean(errorMsg || successMsg)}>
+    {successMsg && (
+      <Alert 
+        severity="success"
+        onClose={() => setSuccessMsg("")} // Clear the success message
+      >
+        {successMsg}
+      </Alert>
+    )}
+    {errorMsg && (
+      <Alert 
+        severity="error"
+        onClose={() => setErrorMsg("")} // Clear the error message
+      >
+        {errorMsg}
+      </Alert>
+    )}
+  </Collapse>
+</Grid>
+
+
+      <Grid item xs={12} align="center">
         <Typography component="h4" variant="h4">
-          Create A Room
+          {title}
         </Typography>
       </Grid>
       <Grid item xs={12} align="center">
@@ -60,7 +147,7 @@ const CreateRoom = () => {
           </FormHelperText>
           <RadioGroup
             row
-            defaultValue="true"
+          defaultValue={guestCanPauseState.toString()}
             onChange={handleGuestCanPauseChange}
           >
             <FormControlLabel
@@ -83,8 +170,8 @@ const CreateRoom = () => {
           <TextField
             required
             type="number"
-            onChange={handleVotesChange}
-            defaultValue={defaultVotes}
+            onChange={handleVotesChangeState}
+            defaultValue={votesToSkipState}
             inputProps={{
               min: 1,
               style: { textAlign: "center" },
@@ -95,20 +182,7 @@ const CreateRoom = () => {
           </FormHelperText>
         </FormControl>
       </Grid>
-      <Grid item xs={12} align="center">
-        <Button
-          color="primary"
-          variant="contained"
-          onClick={handleRoomButtonPressed}
-        >
-          Create A Room
-        </Button>
-      </Grid>
-      <Grid item xs={12} align="center">
-        <Button color="secondary" variant="contained" to="/" component={Link}>
-          Back
-        </Button>
-      </Grid>
+      {update ? renderUpdateButton() : renderCreateButtons()}
     </Grid>
   );
 };
