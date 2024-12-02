@@ -21,4 +21,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('api.urls')),
     path('', include('frontend.urls')),   #render frontend folder urls.py
+    path('spotify/', include('spotify.urls'))
 ]
