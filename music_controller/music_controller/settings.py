@@ -42,7 +42,8 @@ INSTALLED_APPS = [
     'corsheaders',
     'api.apps.ApiConfig',  #manually add- because apps.py in api folder need to tell setting.py
     'rest_framework',  #manually add
-    'frontend.apps.FrontendConfig'
+    'frontend.apps.FrontendConfig',
+    # 'frontend'
 ]
 
 MIDDLEWARE = [
