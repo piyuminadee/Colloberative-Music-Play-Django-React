@@ -45,7 +45,7 @@ def spotify_callback(request):
     ) 
     
     # Redirect to a frontend URL (make sure this is correctly configured)
-    return redirect('frontend:')  # Ensure 'frontend:' is a valid URL pattern in your project
+    return redirect("frontend:")  # Ensure 'frontend:' is a valid URL pattern in your project
 
 
 class AuthURL(APIView):
