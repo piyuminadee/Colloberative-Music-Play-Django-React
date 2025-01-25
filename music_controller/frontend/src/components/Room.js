@@ -8,9 +8,37 @@ const Room = () => {
   const [votesToSkip, setVotesToSkip] = useState(2);
   const [guestCanPause, setGuestCanPause] = useState(false);
   const [isHost, setIsHost] = useState(false);
+  const [song, setSong] = useState(true);
   const [showSettings, setShowSettings] = useState(false);
   const [spotifyAuthenticated, setSpotifyAuthenticated] = useState(false);
   const navigate = useNavigate();
+
+  const getCurrentSong = () => {
+    fetch('/spotify/current-song')
+      .then((response) => {
+        if (response.status === 204) {
+          // Handle the no-content scenario
+          return {}; // Return an empty object
+        }
+        if (!response.ok) {
+          console.error("Error fetching current song:", response.statusText);
+          return {}; // Return an empty object on error
+        }
+        return response.json(); // Parse the JSON response
+      })
+      .then((data) => {
+        if (Object.keys(data).length === 0) {
+          console.log("No song currently playing.");
+          setSong(null); // Set song to null if no data
+        } else {
+          setSong(data); // Update the `song` state with the fetched data
+        }
+      })
+      .catch((error) => {
+        console.error("Network error fetching current song:", error);
+      });
+  };
+  
 
   const leaveButtonPressed = () => {
     const requestOption = {
@@ -99,6 +127,8 @@ const Room = () => {
   useEffect(() => {
     if (roomCode) {
       getRoomDetails();
+      const interval = setInterval(getCurrentSong, 1000); // Fetch the current song every 1 second
+      return () => clearInterval(interval); // Cleanup interval on component unmount
     } else {
       console.error("Room code is not available");
     }
@@ -131,7 +161,7 @@ const Room = () => {
           Code : {roomCode}
         </Typography>
       </Grid>
-      <Grid item xs={12} align="center">
+      {/* <Grid item xs={12} align="center">
         <Typography variant="h6" component="h6">
           Votes : {votesToSkip}
         </Typography>
@@ -145,7 +175,8 @@ const Room = () => {
         <Typography variant="h6" component="h6">
           Host : {isHost.toString()}
         </Typography>
-      </Grid>
+      </Grid> */}
+      {song}
       {isHost ? renderSettingsButton() : null}
       <Grid item xs={12} align="center">
         <Button
