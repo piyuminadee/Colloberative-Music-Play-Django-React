@@ -2,15 +2,44 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Typography, Button, Grid, Grid2 } from "@mui/material";
 import CreateRoom from "./CreateRoom";
+import MusicPlayer from "./MusicPlayer";
 
 const Room = () => {
   const { roomCode } = useParams();
   const [votesToSkip, setVotesToSkip] = useState(2);
   const [guestCanPause, setGuestCanPause] = useState(false);
   const [isHost, setIsHost] = useState(false);
+  const [song, setSong] = useState(null);
   const [showSettings, setShowSettings] = useState(false);
   const [spotifyAuthenticated, setSpotifyAuthenticated] = useState(false);
   const navigate = useNavigate();
+
+  const getCurrentSong = () => {
+    fetch('/spotify/current-song')
+      .then((response) => {
+        if (response.status === 204) {
+          // Handle the no-content scenario
+          return {}; // Return an empty object
+        }
+        if (!response.ok) {
+          console.error("Error fetching current song:", response.statusText);
+          return {}; // Return an empty object on error
+        }
+        return response.json(); // Parse the JSON response
+      })
+      .then((data) => {
+        if (Object.keys(data).length === 0) {
+          console.log("No song currently playing.");
+          setSong(null); // Set song to null if no data
+        } else {
+          setSong(data); // Update the `song` state with the fetched data
+        }
+      })
+      .catch((error) => {
+        console.error("Network error fetching current song:", error);
+      });
+  };
+  
 
   const leaveButtonPressed = () => {
     const requestOption = {
@@ -99,6 +128,8 @@ const Room = () => {
   useEffect(() => {
     if (roomCode) {
       getRoomDetails();
+      const interval = setInterval(getCurrentSong, 1000); // Fetch the current song every 1 second
+      return () => clearInterval(interval); // Cleanup interval on component unmount
     } else {
       console.error("Room code is not available");
     }
@@ -120,6 +151,26 @@ const Room = () => {
       })
       .catch((error) => console.error("Error authenticating Spotify:", error));
   };
+
+  const handlePlayPause = () => {
+    const requestOption = {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    };
+
+    fetch(`/spotify/${song.is_playing ? "pause" : "play"}`, requestOption)
+      .then((response) => {
+        if (!response.ok) {
+          console.error("Error toggling play/pause:", response.statusText);
+        }
+      })
+      .catch((error) => {
+        console.error("Network error toggling play/pause:", error);
+      });
+  };
+
   
 
   return showSettings ? (
@@ -131,21 +182,9 @@ const Room = () => {
           Code : {roomCode}
         </Typography>
       </Grid>
-      <Grid item xs={12} align="center">
-        <Typography variant="h6" component="h6">
-          Votes : {votesToSkip}
-        </Typography>
-      </Grid>
-      <Grid item xs={12} align="center">
-        <Typography variant="h6" component="h6">
-          Guest Can Pause : {guestCanPause.toString()}
-        </Typography>
-      </Grid>
-      <Grid item xs={12} align="center">
-        <Typography variant="h6" component="h6">
-          Host : {isHost.toString()}
-        </Typography>
-      </Grid>
+      {/* song details */}
+       <MusicPlayer song={song} onPlayPause={handlePlayPause}  />
+      {/*end of  song details */}
       {isHost ? renderSettingsButton() : null}
       <Grid item xs={12} align="center">
         <Button
