@@ -2,13 +2,14 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Typography, Button, Grid, Grid2 } from "@mui/material";
 import CreateRoom from "./CreateRoom";
+import MusicPlayer from "./MusicPlayer";
 
 const Room = () => {
   const { roomCode } = useParams();
   const [votesToSkip, setVotesToSkip] = useState(2);
   const [guestCanPause, setGuestCanPause] = useState(false);
   const [isHost, setIsHost] = useState(false);
-  const [song, setSong] = useState(true);
+  const [song, setSong] = useState(null);
   const [showSettings, setShowSettings] = useState(false);
   const [spotifyAuthenticated, setSpotifyAuthenticated] = useState(false);
   const navigate = useNavigate();
@@ -150,6 +151,26 @@ const Room = () => {
       })
       .catch((error) => console.error("Error authenticating Spotify:", error));
   };
+
+  const handlePlayPause = () => {
+    const requestOption = {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    };
+
+    fetch(`/spotify/${song.is_playing ? "pause" : "play"}`, requestOption)
+      .then((response) => {
+        if (!response.ok) {
+          console.error("Error toggling play/pause:", response.statusText);
+        }
+      })
+      .catch((error) => {
+        console.error("Network error toggling play/pause:", error);
+      });
+  };
+
   
 
   return showSettings ? (
@@ -161,22 +182,9 @@ const Room = () => {
           Code : {roomCode}
         </Typography>
       </Grid>
-      {/* <Grid item xs={12} align="center">
-        <Typography variant="h6" component="h6">
-          Votes : {votesToSkip}
-        </Typography>
-      </Grid>
-      <Grid item xs={12} align="center">
-        <Typography variant="h6" component="h6">
-          Guest Can Pause : {guestCanPause.toString()}
-        </Typography>
-      </Grid>
-      <Grid item xs={12} align="center">
-        <Typography variant="h6" component="h6">
-          Host : {isHost.toString()}
-        </Typography>
-      </Grid> */}
-      {song}
+      {/* song details */}
+       <MusicPlayer song={song} onPlayPause={handlePlayPause}  />
+      {/*end of  song details */}
       {isHost ? renderSettingsButton() : null}
       <Grid item xs={12} align="center">
         <Button

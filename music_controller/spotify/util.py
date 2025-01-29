@@ -3,6 +3,8 @@ from django.utils import timezone
 from datetime import timedelta
 from .creadintial import CLIENT_ID,CLIENT_SECREAT
 from requests import post, put, get
+import requests
+
 
 BASE_URL = "https://api.spotify.com/v1/me/"
 
@@ -80,7 +82,4 @@ def execute_spotify_api_request(session_id, endpoint, post_=False, put_=False):
         return response.json()
     except:
         return {'Error': 'Issue with request'}
-
-                
-         
-                    
+    

@@ -6,6 +6,9 @@ from rest_framework import status
 from rest_framework.response import Response
 from .util import *
 from api.models import Room
+from django.views.decorators.csrf import csrf_exempt
+# from spotify.util import pause_song, play_song
+from django.http import JsonResponse
 
 
 def spotify_callback(request):
@@ -118,3 +121,17 @@ class CurrentSong(APIView):
         }
 
         return Response(song, status=status.HTTP_200_OK)
+    
+@csrf_exempt
+def pause(request):
+    if request.method == 'PUT':
+        pause_song()
+        return JsonResponse({'status': 'paused'})
+    return JsonResponse({'error': 'Invalid request method'}, status=400)
+
+@csrf_exempt
+def play(request):
+    if request.method == 'PUT':
+        play_song()
+        return JsonResponse({'status': 'playing'})
+    return JsonResponse({'error': 'Invalid request method'}, status=400)    
